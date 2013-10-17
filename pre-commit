@@ -36,14 +36,25 @@ checks[5]="dpm("
 checks[6]="krumo("
 checks[7]="dpr("
 checks[8]="dsm("
+checks[9]="dd("
+checks[10]="ddebug_backtrace("
+checks[11]="dpq("
+checks[12]="dprint_r("
+checks[13]="drupal_debug("
+checks[14]="dsm("
+checks[15]="dvm("
+checks[16]="dvr("
+checks[17]="kpr("
+checks[18]="kprint_r("
+checks[19]="kdevel_print_object("
 
 # Blacklist code conflicts resulting from Git merge.
-checks[9]="<<<<<<<"
-checks[10]=">>>>>>>"
+checks[20]="<<<<<<<"
+checks[21]=">>>>>>>"
 
 # Blacklist Javascript debugging functions
-checks[11]="console.log("
-checks[12]="alert("
+checks[22]="console.log("
+checks[23]="alert("
 
 
 element_count=${#checks[@]}
