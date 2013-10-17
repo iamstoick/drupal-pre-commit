@@ -1,10 +1,20 @@
 #!/bin/bash
-# PHP CodeSniffer pre-commit hook for git
+# PHP CodeSniffer pre-commit hook for Git
 # Author: Gerald Z. Villorente
 # Co-author: Nikolaos Dimopoulos
-
-
+# Co-author: Engr. Ranel O. Padon
+#
+# This project is made possible also through the collaborative support of the CNN Travel team:
+#   Senior Web Development Manager
+#   Brent A. Deverman
+#
+#   Developer/QA Analyst:
+#   Adrian Christopher B. Cruz
+#   Jonathan A. Jacinto
+#
 # Credits to: Nikolaos Dimopoulos for his great work - http://www.niden.net/2011/11/git-pre-commit-another-check-to-ensure.html
+#
+# See README.txt for the Drupal-Code Sniffer configuration/setup instructions.
 
 # Get hook directory
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
@@ -21,95 +31,129 @@ element_count=${#checks[@]}
 let "element_count = $element_count + 1"
 
 ROOT_DIR="$(pwd)/"
-# Get the modified or added files
-LIST=$(git status | grep -e '\#.*\(modified\|added\)')
+
+# Generate the list of files to be parsed.
+# Include the modified/added files.
+# Exclude Features-generated files because they should not be modified.
+# Exclude contribs modules because they should not be modified.
+# Exclude devel module because they contain debugging functions
+LIST=$( git status | grep -e '\#.*\(modified\|added\)' )
+
 ERRORS_BUFFER=""
+
 # PHP syntax-error free code
 NO_SYNTAX_ERROR=0
+
 # PHP syntax error code
 SYNTAX_ERROR=255
+
 # Code Sniffer error code
 PHPCS_FAILED=1
+
 # Code Sniffer success code
 PHPCS_PASSED=0
+
 for file in $LIST
 do
     if [ "$file" == '#' ]; then
         continue
     fi
+
     if [ $(echo "$file" | grep 'modified') ]; then
         FILE_ACTION="modified"
+
     elif [ $(echo "$file" | grep 'added') ]; then
         FILE_ACTION="added"
-    else 
+
+    else
+
         ##################################
-        # Check for syntax error.  
-        ################################## 
+        # Check for syntax error.
+        ##################################
+
         php -l $file >&2
         SYNTAX_CODE=$?
+
         if [ "$SYNTAX_CODE" -eq "$NO_SYNTAX_ERROR" ];then
           echo ""
           echo "No syntax error detected."
           echo ""
+
           #################################
           # Run Drupal code sniffer
           #################################
+
           # Get the PHP Codesniffer bin path
           PHPCS_BIN=$(which phpcs)
+
           # Default PHP error code
           PHP_CODE=0
-          
-          echo "Running PHP Code Sniffer..."
-          
+
+          echo "Running the PHP Code Sniffer..."
+
           # Run the PHP Codesniffer validation
           $PHPCS_BIN --standard=Drupal $file >&2
+
           # Default PHPCS error code
           PHPCS_CODE=$?
+
           if [ "$PHPCS_CODE" == "$PHPCS_PASSED" ]; then
-            echo "Congratulations! Your commit just passed PHP code sniffer validation."
+            echo "Congratulations! Your commit had just passed the PHP code sniffer validation."
+
           elif [ "$PHPCS_CODE" == "$PHPCS_FAILED" ]; then
-            echo "Your commit failed to pass PHP code sniffer validation."
+            echo "Your commit failed to pass the PHP code sniffer validation."
             exit 1
+
           else
             echo "Invalid operation."
           fi
-        elif [ "$SYNTAX_CODE" == "$SYNTAX_ERROR" ]; then 
+
+        elif [ "$SYNTAX_CODE" == "$SYNTAX_ERROR" ]; then
           echo ""
-          echo "You have syntax error in your code. Please fix and commit again."
+          echo "You have syntax error in your code. Please fix and commit your changes again."
           exit 1
-        else 
+
+        else
           echo ""
           echo "Invalid operation"
         fi
-        
+
         #################################
         # Check for debugging functions
         #################################
-        # Define allowed extensions.
+
+        # Define allowed/possible file extensions that might contain debugging functions.
         EXTENSION=$(echo "$file" | egrep "\.install$|\.test$|\.inc$|\.module$|\.php$")
+
         if [ "$EXTENSION" != "" ]; then
+
             index=1
             while [ "$index" -lt "$element_count" ]
-            do 
+            do
                 ERRORS=$(grep "${checks[$index]}" $ROOT_DIR$file >&1)
+
                 if [ "$ERRORS" != "" ]; then
                     if [ "$ERRORS_BUFFER" != "" ]; then
                         ERRORS_BUFFER="$ERRORS_BUFFER\n$ERRORS"
+
                     else
                         ERRORS_BUFFER="$ERRORS"
                     fi
+
                     echo "${checks[$index]} found in file: $file "
                 fi
+
                 let "index = $index + 1"
             done
         fi
     fi
 done
+
 if [ "$ERRORS_BUFFER" != "" ]; then
-    echo 
+    echo
     echo "These errors were found in try-to-commit files: "
     echo -e $ERRORS_BUFFER
-    echo 
+    echo
     echo "Can't commit, fix errors first."
     exit 1
 fi
@@ -117,9 +161,12 @@ fi
 ########################################
 # Execute Esprima js validation.
 ########################################
+
 files=$(git diff-index --name-only HEAD | grep -P '\.js$')
+
 for file in $files; do
   esvalidate $file
+
   if [ $? -eq 1 ]; then
     echo "Syntax error: $file"
     exit 1
