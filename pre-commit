@@ -19,13 +19,15 @@
 # Get hook directory
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
-# Build the list of blacklisted functions
+# Build the list of blacklisted functions.
 checks[1]="var_dump("
 checks[2]="print_r("
 checks[3]="die("
 checks[4]="dpm("
 checks[5]="debug("
 checks[6]="krumo("
+checks[7]="<<<<<<<"
+checks[8]=">>>>>>>"
 
 element_count=${#checks[@]}
 let "element_count = $element_count + 1"
