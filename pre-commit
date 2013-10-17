@@ -1,5 +1,8 @@
 #!/bin/bash
+#
 # PHP CodeSniffer pre-commit hook for Git
+# See README.md for the Drupal-Code Sniffer configuration/setup instructions.
+#
 # Author: Gerald Z. Villorente
 # Co-author: Nikolaos Dimopoulos
 # Co-author: Engr. Ranel O. Padon
@@ -8,26 +11,40 @@
 #   Senior Web Development Manager:
 #   Brent A. Deverman
 #
-#   Developer/QA Analyst:
+#   Developer:
 #   Adrian Christopher B. Cruz
+#
+#   QA Analyst:
 #   Jonathan A. Jacinto
 #
-# Credits to: Nikolaos Dimopoulos for his great work - http://www.niden.net/2011/11/git-pre-commit-another-check-to-ensure.html
-#
-# See README.md for the Drupal-Code Sniffer configuration/setup instructions.
+# Special Credits to: Nikolaos Dimopoulos for his great work: http://www.niden.net/2011/11/git-pre-commit-another-check-to-ensure.html
+
 
 # Get hook directory
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
-# Build the list of blacklisted functions.
+# Build the list of PHP blacklisted functions
 checks[1]="var_dump("
 checks[2]="print_r("
 checks[3]="die("
-checks[4]="dpm("
-checks[5]="debug("
+
+# Blacklist Drupal's built-in debugging function
+checks[4]="debug("
+
+# Blacklist Devel's debugging functions
+checks[5]="dpm("
 checks[6]="krumo("
-checks[7]="<<<<<<<"
-checks[8]=">>>>>>>"
+checks[7]="dpr("
+checks[8]="dsm("
+
+# Blacklist code conflicts resulting from Git merge.
+checks[9]="<<<<<<<"
+checks[10]=">>>>>>>"
+
+# Blacklist Javascript debugging functions
+checks[11]="console.log("
+checks[12]="alert("
+
 
 element_count=${#checks[@]}
 let "element_count = $element_count + 1"
@@ -54,6 +71,7 @@ PHPCS_FAILED=1
 
 # Code Sniffer success code
 PHPCS_PASSED=0
+
 
 for file in $LIST
 do
@@ -158,6 +176,7 @@ if [ "$ERRORS_BUFFER" != "" ]; then
     echo "Can't commit, fix errors first."
     exit 1
 fi
+
 
 ########################################
 # Execute Esprima js validation.
