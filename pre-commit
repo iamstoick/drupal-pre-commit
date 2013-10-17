@@ -14,7 +14,7 @@
 #
 # Credits to: Nikolaos Dimopoulos for his great work - http://www.niden.net/2011/11/git-pre-commit-another-check-to-ensure.html
 #
-# See README.txt for the Drupal-Code Sniffer configuration/setup instructions.
+# See README.md for the Drupal-Code Sniffer configuration/setup instructions.
 
 # Get hook directory
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
@@ -37,7 +37,7 @@ ROOT_DIR="$(pwd)/"
 # Exclude Features-generated files because they should not be modified.
 # Exclude contribs modules because they should not be modified.
 # Exclude devel module because they contain debugging functions
-LIST=$( git status | grep -e '\#.*\(modified\|added\)' )
+LIST=$( git status | grep -e '\#.*\(modified\|added\)' | grep -v '\#.*\(features\|contribs\|devel\)' )
 
 ERRORS_BUFFER=""
 
