@@ -13,14 +13,14 @@ Requirements:
 
 You need to have a Code Sniffer installed before using this pre-commit script. To install.
 
-1. $ sudo apt-get install php-pear
-2. $ sudo pear update-channels
-3. $ sudo pear install PHP_CodeSniffer
-4. $ sudo ln -sv /path/to/coder/coder_sniffer/Drupal $(pear config-get php_dir)/PHP/CodeSniffer/Standards/Drupal
+1. <strong>$ sudo apt-get install php-pear<strong>
+2. <strong>$ sudo pear update-channels<strong>
+3. <strong>$ sudo pear install PHP_CodeSniffer<strong>
+4. <strong>$ sudo ln -sv /path/to/coder/coder_sniffer/Drupal $(pear config-get php_dir)/PHP/CodeSniffer/Standards/Drupal<strong>
 
 Basically, the idea in #4 is to link/include the Drupal's code sniffer module to the standard PHP Code Sniffer. Here is a sample/actual command for #4:
 
-$ sudo ln -sv /home/ranelpadon/dev/cnngod7/html/sites/all/modules/contribs/coder/coder_sniffer/Drupal $(pear config-get php_dir)/PHP/CodeSniffer/Standards/Drupal
+<strong>$ sudo ln -sv /home/ranelpadon/dev/cnngod7/html/sites/all/modules/contribs/coder/coder_sniffer/Drupal $(pear config-get php_dir)/PHP/CodeSniffer/Standards/Drupal</strong>
 
 The <strong>$(pear config-get php_dir)</strong> part in the #4 command will be usually evaluated in Ubuntu as <strong>/usr/share/php</strong>
 
