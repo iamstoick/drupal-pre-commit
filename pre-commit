@@ -104,7 +104,6 @@ do
 
           elif [ "$PHPCS_CODE" == "$PHPCS_FAILED" ]; then
             echo "Your commit failed to pass the PHP code sniffer validation."
-            exit 1
 
           else
             echo "Invalid operation."
