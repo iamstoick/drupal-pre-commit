@@ -19,6 +19,19 @@
 #
 # Special Credits to: Nikolaos Dimopoulos for his great work: http://www.niden.net/2011/11/git-pre-commit-another-check-to-ensure.html
 
+echo
+echo "************************************************************************"
+echo "*                                                                      *"
+echo "*   GIT PRE-COMMIT HOOK FOR DRUPAL                                     *"
+echo "*                                                                      *"
+echo "*   In order to commit your changes, it must pass the three filters:   *"
+echo "*   I. Syntax checking using PHP Linter                                *"
+echo "*   II. Coding standards checking using PHP Code Sniffer               *"
+echo "*   III. Blacklisted functions checking/validation.                    *"
+echo "*                                                                      *"
+echo "************************************************************************"
+echo
+
 
 # Get hook directory
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
@@ -56,18 +69,20 @@ checks[21]=">>>>>>>"
 checks[22]="console.log("
 checks[23]="alert("
 
-
 element_count=${#checks[@]}
 let "element_count = $element_count + 1"
 
 ROOT_DIR="$(pwd)/"
 
 # Generate the list of files to be parsed.
-# Include the modified/added files.
+# Include the modified/added files indicated in the output of the Git status command.
 # Exclude Features-generated files because they should not be modified.
 # Exclude contribs modules because they should not be modified.
 # Exclude devel module because they contain debugging functions
 LIST=$( git status | grep -e '\#.*\(modified\|added\)' | grep -v '\#.*\(features\|contribs\|devel\)' )
+
+# This counter is used by the Code Sniffer for tracking errors.
+sniffer_error_count=0
 
 ERRORS_BUFFER=""
 
@@ -82,7 +97,6 @@ PHPCS_FAILED=1
 
 # Code Sniffer success code
 PHPCS_PASSED=0
-
 
 for file in $LIST
 do
@@ -102,13 +116,16 @@ do
         # Check for syntax error.
         ##################################
 
+        echo
+        echo "I. Running the PHP Linter..."
+
         php -l $file >&2
         SYNTAX_CODE=$?
 
         if [ "$SYNTAX_CODE" -eq "$NO_SYNTAX_ERROR" ];then
-          echo ""
+          echo
           echo "No syntax error detected."
-          echo ""
+          echo
 
           #################################
           # Run Drupal code sniffer
@@ -120,7 +137,8 @@ do
           # Default PHP error code
           PHP_CODE=0
 
-          echo "Running the PHP Code Sniffer..."
+          echo
+          echo "II. Running the PHP Code Sniffer..."
 
           # Run the PHP Codesniffer validation
           $PHPCS_BIN --standard=Drupal $file >&2
@@ -129,23 +147,29 @@ do
           PHPCS_CODE=$?
 
           if [ "$PHPCS_CODE" == "$PHPCS_PASSED" ]; then
-            echo "Congratulations! Your commit had just passed the PHP code sniffer validation."
+            # Do nothing if passed.
+            :
 
           elif [ "$PHPCS_CODE" == "$PHPCS_FAILED" ]; then
-            echo "Your commit failed to pass the PHP code sniffer validation."
+            let "sniffer_error_count += 1"
 
           else
             echo "Invalid operation."
+            echo
+            exit 1
           fi
 
         elif [ "$SYNTAX_CODE" == "$SYNTAX_ERROR" ]; then
           echo ""
           echo "You have syntax error in your code. Please fix and commit your changes again."
+          echo
           exit 1
 
         else
-          echo ""
-          echo "Invalid operation"
+          echo
+          echo "Invalid operation."
+          echo
+          exit 1
         fi
 
         #################################
@@ -160,34 +184,57 @@ do
             index=1
             while [ "$index" -lt "$element_count" ]
             do
+                # Find the blacklisted functions in the current file.
                 ERRORS=$(grep "${checks[$index]}" $ROOT_DIR$file >&1)
-
                 if [ "$ERRORS" != "" ]; then
                     if [ "$ERRORS_BUFFER" != "" ]; then
-                        ERRORS_BUFFER="$ERRORS_BUFFER\n$ERRORS"
+                        ERRORS_BUFFER+="\n${checks[$index]} found in file: $file "
 
                     else
-                        ERRORS_BUFFER="$ERRORS"
+                        ERRORS_BUFFER="\n${checks[$index]} found in file: $file "
                     fi
-
-                    echo "${checks[$index]} found in file: $file "
                 fi
 
-                let "index = $index + 1"
+                let "index += 1"
             done
         fi
     fi
 done
+
+
+if [ "$sniffer_error_count" -gt "0" ]; then
+    echo "Your commits failed to pass the PHP code sniffer validation."
+    echo "Kindly fix the code sniffer notices."
+    echo
+    exit 1
+
+else
+    echo
+    echo "No formatting error(s) detected."
+    echo
+fi
+
+echo
+echo "III. Running the checker/validator for blacklisted functions..."
 
 if [ "$ERRORS_BUFFER" != "" ]; then
     echo
     echo "These errors were found in try-to-commit files: "
     echo -e $ERRORS_BUFFER
     echo
-    echo "Can't commit, fix errors first."
+    echo "Can't commit your changes, fix the generated errors first."
+    echo
     exit 1
+
+else
+    echo
+    echo "No backlisted function(s) detected."
+    echo
 fi
 
+echo
+echo "Congratulations! You have passed all the filters, your code has now been committed."
+echo
 
 ########################################
 # Execute Esprima js validation.
