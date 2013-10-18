@@ -1,12 +1,13 @@
 Git Pre-Commit Hook Setup:
 ------
 
-1. Rename pre-commit.sample to pre-commit. The file is located in {WebRootDir}/.git/hooks
+1. Rename pre-commit.sample to pre-commit. The file is located in {GitRootDir}/.git/hooks
 
 2. Replace the content with the attached file.
 
 3. Make sure that the file has an execute permission.
-   <strong>$ sudo chmod +x /path/to/pre-commit</<strong>>
+
+   <strong>$ sudo chmod +x /path/to/pre-commit</strong>>
 
 Requirements:
 -------------
