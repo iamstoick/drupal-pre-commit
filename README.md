@@ -14,7 +14,7 @@ Requirements:
 You need to have a Code Sniffer installed before using this pre-commit script. To install.
 
 1. For Debian-based systems:
-   <strong>$ sudo apt-get install php-pear<strong>
+   <strong>$ sudo apt-get install php-pear</strong>
    For Mac OS:
    http://jason.pureconcepts.net/2012/10/install-pear-pecl-mac-os-x/
 2. <strong>$ sudo pear update-channels<strong>
