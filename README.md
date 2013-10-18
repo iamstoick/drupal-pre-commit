@@ -1,19 +1,30 @@
 Git Pre-Commit Hook Setup:
 ------
 
-1. Rename pre-commit.sample to pre-commit. The file is located in {WebRootDir}/.git/hooks
+1. Rename pre-commit.sample to pre-commit. The file is located in {GitRootDir}/.git/hooks
 
 2. Replace the content with the attached file.
 
 3. Make sure that the file has an execute permission.
-   <strong>$ sudo chmod +x /path/to/pre-commit</<strong>>
+
+   <strong>$ sudo chmod +x /path/to/pre-commit</strong>>
 
 Requirements:
 -------------
 
 You need to have a Code Sniffer installed before using this pre-commit script. To install.
 
-1. <strong>$ sudo apt-get install php-pear<strong>
+1. For Debian-based systems:
+ 
+   <strong>$ sudo apt-get install php-pear</strong>
+
+   For Mac OS:
+   
+   http://jason.pureconcepts.net/2012/10/install-pear-pecl-mac-os-x/
+   
+   Or see the general installation guidelines:
+   
+   http://pear.php.net/manual/en/installation.getting.php
 2. <strong>$ sudo pear update-channels<strong>
 3. <strong>$ sudo pear install PHP_CodeSniffer<strong>
 4. <strong>$ sudo ln -sv /path/to/coder/coder_sniffer/Drupal $(pear config-get php_dir)/PHP/CodeSniffer/Standards/Drupal<strong>
@@ -54,6 +65,7 @@ This is optional and not required by pre-commit.
 Install <strong>Esprima</strong> as JS validator.
 
 To manually run Esprima from commandline interface.
+
 1. <strong>esvalidate foo.js</strong> - For single file
 2. <strong>esvalidate foo.js bar.js</strong> - For multiple files
 
