@@ -13,7 +13,10 @@ Requirements:
 
 You need to have a Code Sniffer installed before using this pre-commit script. To install.
 
-1. <strong>$ sudo apt-get install php-pear<strong>
+1. For Debian-based systems:
+   <strong>$ sudo apt-get install php-pear<strong>
+   For Mac OS:
+   http://jason.pureconcepts.net/2012/10/install-pear-pecl-mac-os-x/
 2. <strong>$ sudo pear update-channels<strong>
 3. <strong>$ sudo pear install PHP_CodeSniffer<strong>
 4. <strong>$ sudo ln -sv /path/to/coder/coder_sniffer/Drupal $(pear config-get php_dir)/PHP/CodeSniffer/Standards/Drupal<strong>
