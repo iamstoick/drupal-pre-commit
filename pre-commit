@@ -84,6 +84,24 @@ ROOT_DIR="$(pwd)/"
 # add to list of text the "new file"
 LIST=$( git status | grep -e '\#.*\(modified\|added\|new file\)' | grep -v '\#.*\(features\|contribs\|devel\)' )
 
+
+# Display the list of files to be processed, for overview purposes.
+echo
+echo "File(s) to be proccessed/validated:"
+echo
+
+i=1
+for file in $LIST
+do
+  # Display the path of the file.
+  # % 3 == 0 is used since the path of the file is outputted every 3rd token/line.
+  if [ "$(($i % 3))" -eq "0" ]; then
+    echo $file
+  fi
+  let "i += 1"
+done
+
+
 # This counter is used by the Code Sniffer for tracking errors.
 sniffer_error_count=0
 
