@@ -213,6 +213,7 @@ if [ "$sniffer_error_count" -gt "0" ]; then
 fi
 
 echo
+echo
 echo "III. Running the checker/validator for blacklisted functions..."
 
 if [ "$ERRORS_BUFFER" != "" ]; then
