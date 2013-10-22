@@ -82,7 +82,7 @@ ROOT_DIR="$(pwd)/"
 # Exclude contribs modules because they should not be modified.
 # Exclude devel module because they contain debugging functions
 # add to list of text the "new file"
-LIST=$( git status | grep -e '\#.*\(modified\|added\)' | grep -v '\#.*\(features\|contribs\|devel\)' )
+LIST=$( git status | grep -e '\#.*\(modified\|added\|new file\)' | grep -v '\#.*\(features\|contribs\|devel\)' )
 
 # This counter is used by the Code Sniffer for tracking errors.
 sniffer_error_count=0
