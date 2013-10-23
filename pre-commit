@@ -1,4 +1,4 @@
-#!/bin/bash
+!/bin/bash
 #
 # PHP CodeSniffer pre-commit hook for Git
 # See README.md for the Drupal-Code Sniffer configuration/setup instructions.
@@ -28,6 +28,7 @@ echo "*   In order to commit your changes, it must pass the three filters:   *"
 echo "*   I. Syntax checking using PHP Linter                                *"
 echo "*   II. Coding standards checking using PHP Code Sniffer               *"
 echo "*   III. Blacklisted functions checking/validation.                    *"
+echo "*   IV. Check Javascript syntax.                                       *"
 echo "*                                                                      *"
 echo "************************************************************************"
 echo
@@ -249,21 +250,41 @@ else
     echo
 fi
 
-echo
-echo "Congratulations! You have passed all the filters, your code has now been committed."
-echo
-
 ########################################
 # Execute Esprima js validation.
 ########################################
 
-files=$(git diff-index --name-only HEAD | grep -P '\.js$')
+echo
+echo "IV. Check Javascript syntax."
+echo
 
-for file in $files; do
-  esvalidate $file
+files=$(git diff-index --name-only HEAD | grep -e '\.js$')
+
+if [ ${#files[@]} = 0 ]; then
+  echo "No JS files found."
+  echo
+
+else
+  hash esvalidate 2>/dev/null 
 
   if [ $? -eq 1 ]; then
-    echo "Syntax error: $file"
+    echo "Unable to check Javascript syntax: esvalidate is not available."
+    echo
+    echo "Please install esvalidate to validate JS files."
+    echo
     exit 1
   fi
-done
+
+  for file in $files; do
+    esvalidate $file
+
+    if [ $? -eq 1 ]; then
+      echo "Syntax error: $file"
+      exit 1
+    fi
+  done
+fi
+
+echo "Congratulations! You have passed all the filters, your code has now been committed."
+echo
+
