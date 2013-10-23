@@ -24,7 +24,7 @@ echo "************************************************************************"
 echo "*                                                                      *"
 echo "*   GIT PRE-COMMIT HOOK FOR DRUPAL                                     *"
 echo "*                                                                      *"
-echo "*   In order to commit your changes, it must pass the three filters:   *"
+echo "*   In order to commit your changes, it must pass the four filters:    *"
 echo "*   I. Syntax checking using PHP Linter                                *"
 echo "*   II. Coding standards checking using PHP Code Sniffer               *"
 echo "*   III. Blacklisted functions checking/validation.                    *"
@@ -82,9 +82,9 @@ ROOT_DIR="$(pwd)/"
 # Exclude Features-generated files because they should not be modified.
 # Exclude contribs modules because they should not be modified.
 # Exclude devel module because they contain debugging functions
-# add to list of text the "new file"
-LIST=$( git status | grep -e '\#.*\(modified\|added\|new file\)' | grep -v '\#.*\(features\|contribs\|devel\)' )
-
+# Exclude libraries because they should not be modified
+# Exclude extensions we know should not be checked.
+LIST=$( git status | grep -e '\#.*\(modified\|added\|new file\)' | grep -v '\#.*\(features\|contribs\|devel\|libraries\)' | grep -v '\#.*\.\(png\|patch\|ad\|htaccess\)$' )
 
 # Display the list of files to be processed, for overview purposes.
 echo
@@ -92,16 +92,13 @@ echo "File(s) to be proccessed/validated:"
 echo
 
 i=1
+IFS=$'\n'
 for file in $LIST
 do
   # Display the path of the file.
   # % 3 == 0 is used since the path of the file is outputted every 3rd token/line.
-  if [ "$(($i % 3))" -eq "0" ]; then
-    echo $file
-  fi
-  let "i += 1"
+  echo $file | cut -c15-
 done
-
 
 # This counter is used by the Code Sniffer for tracking errors.
 sniffer_error_count=0
@@ -122,105 +119,97 @@ PHPCS_PASSED=0
 
 for file in $LIST
 do
-    if [ "$file" == '#' ]; then
-        continue
-    fi
+    file=$( echo $file | cut -c15- )
 
-    if [ $(echo "$file" | grep 'modified') ]; then
-        FILE_ACTION="modified"
+    ##################################
+    # Check for syntax error.
+    ##################################
 
-    elif [ $(echo "$file" | grep 'added') ]; then
-        FILE_ACTION="added"
+    echo
+    echo
+    echo
+    echo "Validating: $file..."
+    echo
+    echo "I. Running the PHP Linter..."
+    echo
+
+    php -l $file >&2
+    SYNTAX_CODE=$?
+
+    if [ "$SYNTAX_CODE" -eq "$NO_SYNTAX_ERROR" ];then
+
+      #################################
+      # Run Drupal code sniffer
+      #################################
+
+      # Get the PHP Codesniffer bin path
+      PHPCS_BIN=$(which phpcs)
+
+      # Default PHP error code
+      PHP_CODE=0
+
+      echo
+      echo
+      echo "II. Running the PHP Code Sniffer..."
+
+      # Run the PHP Codesniffer validation
+      $PHPCS_BIN --standard=Drupal $file >&2
+
+      # Default PHPCS error code
+      PHPCS_CODE=$?
+
+      if [ "$PHPCS_CODE" == "$PHPCS_PASSED" ]; then
+        echo
+        echo "No formatting errors detected."
+
+      elif [ "$PHPCS_CODE" == "$PHPCS_FAILED" ]; then
+        let "sniffer_error_count += 1"
+
+      else
+        echo
+        echo "Invalid operation."
+        echo
+        exit 1
+      fi
+
+    elif [ "$SYNTAX_CODE" == "$SYNTAX_ERROR" ]; then
+      echo
+      echo "You have syntax error in your code. Please fix and commit your changes again."
+      echo
+      exit 1
 
     else
+      echo
+      echo "Invalid operation."
+      echo
+      exit 1
+    fi
 
-        ##################################
-        # Check for syntax error.
-        ##################################
+    #################################
+    # Check for debugging functions
+    #################################
 
-        echo
-        echo
-        echo "I. Running the PHP Linter..."
-        echo
+    # Define allowed/possible file extensions that might contain debugging functions.
+    EXTENSION=$(echo "$file" | egrep "\.install$|\.test$|\.inc$|\.module$|\.php$")
 
-        php -l $file >&2
-        SYNTAX_CODE=$?
+    if [ "$EXTENSION" != "" ]; then
 
-        if [ "$SYNTAX_CODE" -eq "$NO_SYNTAX_ERROR" ];then
+        index=1
+        while [ "$index" -lt "$element_count" ]
+        do
+            # Find the blacklisted functions in the current file.
+            ERRORS=$(grep "${checks[$index]}" $ROOT_DIR$file >&1)
+            if [ "$ERRORS" != "" ]; then
+                if [ "$ERRORS_BUFFER" != "" ]; then
+                    ERRORS_BUFFER+="\n${checks[$index]} found in file: $file "
 
-          #################################
-          # Run Drupal code sniffer
-          #################################
-
-          # Get the PHP Codesniffer bin path
-          PHPCS_BIN=$(which phpcs)
-
-          # Default PHP error code
-          PHP_CODE=0
-
-          echo
-          echo
-          echo "II. Running the PHP Code Sniffer..."
-
-          # Run the PHP Codesniffer validation
-          $PHPCS_BIN --standard=Drupal $file >&2
-
-          # Default PHPCS error code
-          PHPCS_CODE=$?
-
-          if [ "$PHPCS_CODE" == "$PHPCS_PASSED" ]; then
-            echo
-            echo "No formatting errors detected."
-
-          elif [ "$PHPCS_CODE" == "$PHPCS_FAILED" ]; then
-            let "sniffer_error_count += 1"
-
-          else
-            echo
-            echo "Invalid operation."
-            echo
-            exit 1
-          fi
-
-        elif [ "$SYNTAX_CODE" == "$SYNTAX_ERROR" ]; then
-          echo
-          echo "You have syntax error in your code. Please fix and commit your changes again."
-          echo
-          exit 1
-
-        else
-          echo
-          echo "Invalid operation."
-          echo
-          exit 1
-        fi
-
-        #################################
-        # Check for debugging functions
-        #################################
-
-        # Define allowed/possible file extensions that might contain debugging functions.
-        EXTENSION=$(echo "$file" | egrep "\.install$|\.test$|\.inc$|\.module$|\.php$")
-
-        if [ "$EXTENSION" != "" ]; then
-
-            index=1
-            while [ "$index" -lt "$element_count" ]
-            do
-                # Find the blacklisted functions in the current file.
-                ERRORS=$(grep "${checks[$index]}" $ROOT_DIR$file >&1)
-                if [ "$ERRORS" != "" ]; then
-                    if [ "$ERRORS_BUFFER" != "" ]; then
-                        ERRORS_BUFFER+="\n${checks[$index]} found in file: $file "
-
-                    else
-                        ERRORS_BUFFER="\n${checks[$index]} found in file: $file "
-                    fi
+                else
+                    ERRORS_BUFFER="\n${checks[$index]} found in file: $file "
                 fi
+            fi
 
-                let "index += 1"
-            done
-        fi
+            let "index += 1"
+        done
     fi
 done
 
