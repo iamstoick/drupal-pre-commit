@@ -1,4 +1,4 @@
-!/bin/bash
+#!/bin/bash
 #
 # PHP CodeSniffer pre-commit hook for Git
 # See README.md for the Drupal-Code Sniffer configuration/setup instructions.
