@@ -44,37 +44,37 @@ echo
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 # Build the list of PHP blacklisted functions
-checks[1]="var_dump("
-checks[2]="print_r("
-checks[3]="die("
+checks[1]="\<var_dump("
+checks[2]="\<print_r("
+checks[3]="\<die("
 
 # Blacklist Drupal's built-in debugging function
-checks[4]="debug("
+checks[4]="\<debug("
 
 # Blacklist Devel's debugging functions
-checks[5]="dpm("
-checks[6]="krumo("
-checks[7]="dpr("
-checks[8]="dsm("
-checks[9]="dd("
-checks[10]="ddebug_backtrace("
-checks[11]="dpq("
-checks[12]="dprint_r("
-checks[13]="drupal_debug("
-checks[14]="dsm("
-checks[15]="dvm("
-checks[16]="dvr("
-checks[17]="kpr("
-checks[18]="kprint_r("
-checks[19]="kdevel_print_object("
+checks[5]="\<dpm("
+checks[6]="\<krumo("
+checks[7]="\<dpr("
+checks[8]="\<dsm("
+checks[9]="\<dd("
+checks[10]="\<ddebug_backtrace("
+checks[11]="\<dpq("
+checks[12]="\<dprint_r("
+checks[13]="\<drupal_debug("
+checks[14]="\<dsm("
+checks[15]="\<dvm("
+checks[16]="\<dvr("
+checks[17]="\<kpr("
+checks[18]="\<kprint_r("
+checks[19]="\<kdevel_print_object("
 
 # Blacklist code conflicts resulting from Git merge.
 checks[20]="<<<<<<<"
 checks[21]=">>>>>>>"
 
 # Blacklist Javascript debugging functions
-checks[22]="console.log("
-checks[23]="alert("
+checks[22]="\<console.log("
+checks[23]="\<alert("
 
 # Get the total number of blacklisted functions.
 element_count=${#checks[@]}
