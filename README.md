@@ -14,22 +14,24 @@ Requirements:
 
 You need to have a Code Sniffer installed before using this pre-commit script. To install.
 
-   For Debian-based systems:
+For Debian-based systems:
 ``` 
 $ sudo apt-get install php-pear
 ```
 
-   For Mac OS:
+For Mac OS:
+
+http://jason.pureconcepts.net/2012/10/install-pear-pecl-mac-os-x/
+
+Or see the general installation guidelines:
+
+http://pear.php.net/manual/en/installation.getting.php
    
-   http://jason.pureconcepts.net/2012/10/install-pear-pecl-mac-os-x/
-   
-   Or see the general installation guidelines:
-   
-   http://pear.php.net/manual/en/installation.getting.php
-   
-`$ sudo pear update-channels`
-`$ sudo pear install PHP_CodeSniffer`
-`$ sudo ln -sv /path/to/coder/coder_sniffer/Drupal $(pear config-get php_dir)/PHP/CodeSniffer/Standards/Drupal<strong>`
+```
+$ sudo pear update-channels
+$ sudo pear install PHP_CodeSniffer
+$ sudo ln -sv /path/to/coder/coder_sniffer/Drupal $(pear config-get php_dir)/PHP/CodeSniffer/Standards/Drupal<strong>
+```
 
 Basically, the idea in #4 is to link/include the Drupal's code sniffer module to the standard PHP Code Sniffer. Here is a sample/actual command for #4:
 
