@@ -35,7 +35,9 @@ $ sudo ln -sv /path/to/coder/coder_sniffer/Drupal $(pear config-get php_dir)/PHP
 
 Basically, the idea in #4 is to link/include the Drupal's code sniffer module to the standard PHP Code Sniffer. Here is a sample/actual command for #4:
 
-<strong>$ sudo ln -sv /home/ranelpadon/dev/cnngod7/html/sites/all/modules/contribs/coder/coder_sniffer/Drupal $(pear config-get php_dir)/PHP/CodeSniffer/Standards/Drupal</strong>
+```
+$ sudo ln -sv /home/ranelpadon/dev/cnngod7/html/sites/all/modules/contribs/coder/coder_sniffer/Drupal $(pear config-get php_dir)/PHP/CodeSniffer/Standards/Drupal
+```
 
 The <strong>$(pear config-get php_dir)</strong> part in the #4 command will be usually evaluated in Ubuntu as <strong>/usr/share/php</strong>
 
@@ -64,7 +66,9 @@ it will display the line of code and the filename that contain bad code. The dev
 
 If you're really sure that it is ok to commit the changes without resolving the coding standard problem detected by the script, you can skip or bypass the validation by using <strong>--no-verify</strong>
 
-Ex: `$ git commit -am "#1452 Commit message | Bypassing validation process" --no-verify`
+```
+$ git commit -am "#1452 Commit message | Bypassing validation process" --no-verify
+```
 
 
 -----------------------------------------------------------------------------------------------------------------------
