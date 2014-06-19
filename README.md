@@ -1,5 +1,5 @@
 Git Pre-Commit Hook Setup:
-------
+-------------------------
 
 1. Rename pre-commit.sample to pre-commit. The file is located in {GitRootDir}/.git/hooks
 
@@ -35,6 +35,12 @@ Basically, the idea in #4 is to link/include the Drupal's code sniffer module to
 
 The <strong>$(pear config-get php_dir)</strong> part in the #4 command will be usually evaluated in Ubuntu as <strong>/usr/share/php</strong>
 
+To make your Drupal code sniffer module global and not dependent on any Drupal project you can put the module in Drush home folder.
+```
+$ cd ~/.drush
+$ drush dl coder
+$ sudo ln -sv ~/.drush/coder/coder_sniffer/Drupal $(pear config-get php_dir)/PHP/CodeSniffer/Standards/Drupal
+```
 
 Usage:
 --------
