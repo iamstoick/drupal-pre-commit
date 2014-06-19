@@ -14,9 +14,10 @@ Requirements:
 
 You need to have a Code Sniffer installed before using this pre-commit script. To install.
 
-1. For Debian-based systems:
- 
-   <strong>$ sudo apt-get install php-pear</strong>
+   For Debian-based systems:
+``` 
+$ sudo apt-get install php-pear
+```
 
    For Mac OS:
    
@@ -25,9 +26,10 @@ You need to have a Code Sniffer installed before using this pre-commit script. T
    Or see the general installation guidelines:
    
    http://pear.php.net/manual/en/installation.getting.php
-2. <strong>$ sudo pear update-channels<strong>
-3. <strong>$ sudo pear install PHP_CodeSniffer<strong>
-4. <strong>$ sudo ln -sv /path/to/coder/coder_sniffer/Drupal $(pear config-get php_dir)/PHP/CodeSniffer/Standards/Drupal<strong>
+   
+`$ sudo pear update-channels`
+`$ sudo pear install PHP_CodeSniffer`
+`$ sudo ln -sv /path/to/coder/coder_sniffer/Drupal $(pear config-get php_dir)/PHP/CodeSniffer/Standards/Drupal<strong>`
 
 Basically, the idea in #4 is to link/include the Drupal's code sniffer module to the standard PHP Code Sniffer. Here is a sample/actual command for #4:
 
@@ -60,7 +62,7 @@ it will display the line of code and the filename that contain bad code. The dev
 
 If you're really sure that it is ok to commit the changes without resolving the coding standard problem detected by the script, you can skip or bypass the validation by using <strong>--no-verify</strong>
 
-Ex: <strong>$ git commit -am "#1452 Commit message | Bypassing validation process" --no-verify</strong>
+Ex: `$ git commit -am "#1452 Commit message | Bypassing validation process" --no-verify`
 
 
 -----------------------------------------------------------------------------------------------------------------------
