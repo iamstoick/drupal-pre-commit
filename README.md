@@ -7,7 +7,9 @@ Git Pre-Commit Hook Setup:
 
 3. Make sure that the file has an execute permission.
 
-   <strong>$ sudo chmod +x /path/to/pre-commit</strong>>
+```
+$ sudo chmod +x /path/to/.git/hooks/pre-commit
+```
 
 Requirements:
 -------------
@@ -15,6 +17,7 @@ Requirements:
 You need to have a Code Sniffer installed before using this pre-commit script. To install.
 
 For Debian-based systems:
+
 ``` 
 $ sudo apt-get install php-pear
 ```
