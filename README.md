@@ -18,7 +18,7 @@ You need to have a Code Sniffer installed before using this pre-commit script. T
 
 For Debian-based systems:
 
-``` 
+```
 $ sudo apt-get install php-pear
 ```
 
@@ -29,7 +29,7 @@ http://jason.pureconcepts.net/2012/10/install-pear-pecl-mac-os-x/
 Or see the general installation guidelines:
 
 http://pear.php.net/manual/en/installation.getting.php
-   
+
 ```
 $ sudo pear update-channels
 $ sudo pear install PHP_CodeSniffer
@@ -101,3 +101,8 @@ To use it (e.g., in <strong>Geany IDE</strong>):
 1. Build > Esprima
 
 <a rel="license" href="http://creativecommons.org/licenses/by-nc/3.0/deed.en_US"><img alt="Creative Commons License" style="border-width:0" src="http://i.creativecommons.org/l/by-nc/3.0/88x31.png" /></a><br /><span xmlns:dct="http://purl.org/dc/terms/" property="dct:title">Drupal Pre Commit Filter</span> by <span xmlns:cc="http://creativecommons.org/ns#" property="cc:attributionName">Gerald Villorente</span> is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-nc/3.0/deed.en_US">Creative Commons Attribution-NonCommercial 3.0 Unported License</a>.<br />Based on a work at <a xmlns:dct="http://purl.org/dc/terms/" href="http://www.niden.net/2011/11/git-pre-commit-another-check-to-ensure.html" rel="dct:source">http://www.niden.net/2011/11/git-pre-commit-another-check-to-ensure.html</a>.
+
+NOTE:
+-----
+
+Any any case that the pre-commit is jumping to Step #3, you have to update your precommit `$LIST` variable to remove `\#`.
