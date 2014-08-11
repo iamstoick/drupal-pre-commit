@@ -81,6 +81,10 @@ This is optional and not required by pre-commit.
 
 Install <strong>Esprima</strong> as JS validator.
 
+To install Esprima:
+
+`sudo npm -g install esprima`
+
 To manually run Esprima from commandline interface.
 
 1. <strong>esvalidate foo.js</strong> - For single file
