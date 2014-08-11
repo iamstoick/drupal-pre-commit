@@ -106,4 +106,10 @@ NOTE:
 -----
 
 Any any case that the pre-commit is jumping to Step #3, you have to update your precommit `$LIST` variable to remove `\#`. So from
-`LIST=$( git status | grep -e '\#.*\(modified\|added\|new file\)' | grep -v '\#.*\(features\|contribs\|devel\)' )` to `LIST=$( git status | grep -e '.*\(modified\|added\|new file\)' | grep -v '.*\(features\|contribs\|devel\)' )`
+```
+LIST=$( git status | grep -e '\#.*\(modified\|added\|new file\)' | grep -v '\#.*\(features\|contribs\|devel\)' )
+```
+to
+```
+LIST=$( git status | grep -e '.*\(modified\|added\|new file\)' | grep -v '.*\(features\|contribs\|devel\)' )
+```
