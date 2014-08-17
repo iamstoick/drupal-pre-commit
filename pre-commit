@@ -20,12 +20,18 @@
 #
 # Special Credits to: Nikolaos Dimopoulos for his great work: http://www.niden.net/2011/11/git-pre-commit-another-check-to-ensure.html
 
+# Define a function to exit which can reset $IFS.
+clean_exit(){
+  IFS=$IFSBACK
+  exit 1
+}
+
 echo
 echo "************************************************************************"
 echo "*                                                                      *"
 echo "*   GIT PRE-COMMIT HOOK FOR DRUPAL                                     *"
 echo "*                                                                      *"
-echo "*   In order to commit your changes, it must pass the three filters:   *"
+echo "*   In order to commit your changes, it must pass the four filters:    *"
 echo "*   I. Syntax checking using PHP Linter                                *"
 echo "*   II. Coding standards checking using PHP Code Sniffer               *"
 echo "*   III. Blacklisted functions checking/validation.                    *"
@@ -39,37 +45,37 @@ echo
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 # Build the list of PHP blacklisted functions
-checks[1]="var_dump("
-checks[2]="print_r("
-checks[3]="die("
+checks[1]="\<var_dump("
+checks[2]="\<print_r("
+checks[3]="\<die("
 
 # Blacklist Drupal's built-in debugging function
-checks[4]="debug("
+checks[4]="\<debug("
 
 # Blacklist Devel's debugging functions
-checks[5]="dpm("
-checks[6]="krumo("
-checks[7]="dpr("
-checks[8]="dsm("
-checks[9]="dd("
-checks[10]="ddebug_backtrace("
-checks[11]="dpq("
-checks[12]="dprint_r("
-checks[13]="drupal_debug("
-checks[14]="dsm("
-checks[15]="dvm("
-checks[16]="dvr("
-checks[17]="kpr("
-checks[18]="kprint_r("
-checks[19]="kdevel_print_object("
+checks[5]="\<dpm("
+checks[6]="\<krumo("
+checks[7]="\<dpr("
+checks[8]="\<dsm("
+checks[9]="\<dd("
+checks[10]="\<ddebug_backtrace("
+checks[11]="\<dpq("
+checks[12]="\<dprint_r("
+checks[13]="\<drupal_debug("
+checks[14]="\<dsm("
+checks[15]="\<dvm("
+checks[16]="\<dvr("
+checks[17]="\<kpr("
+checks[18]="\<kprint_r("
+checks[19]="\<kdevel_print_object("
 
 # Blacklist code conflicts resulting from Git merge.
 checks[20]="<<<<<<<"
 checks[21]=">>>>>>>"
 
 # Blacklist Javascript debugging functions
-checks[22]="console.log("
-checks[23]="alert("
+checks[22]="\<console.log("
+checks[23]="\<alert("
 
 # Get the total number of blacklisted functions.
 element_count=${#checks[@]}
@@ -80,29 +86,63 @@ ROOT_DIR="$(pwd)/"
 
 # Generate the list of files to be parsed.
 # Include the modified/added files indicated in the output of the Git status command.
+
+filters_include[1]="^\#\s*modified"
+filters_include[2]="^\#\s*added"
+filters_include[3]="^\#\s*new file"
+
 # Exclude Features-generated files because they should not be modified.
 # Exclude contribs modules because they should not be modified.
 # Exclude devel module because they contain debugging functions
-# add to list of text the "new file"
-LIST=$( git status | grep -e '\#.*\(modified\|added\|new file\)' | grep -v '\#.*\(features\|contribs\|devel\)' )
+# Exclude libraries because they should not be modified
+filters_exclude[1]='features'
+filters_exclude[2]='contribs'
+filters_exclude[3]='devel'
+filters_exclude[4]='libraries'
 
+# Exclude extensions we know should not be checked.
+filters_exclude[5]='\.png$'
+filters_exclude[6]='\.patch$'
+filters_exclude[7]='\.ad$'
+filters_exclude[8]='\.htaccess$'
+filters_exclude[9]='\.sh$'
+
+# Additional excludes specific to this project
+# filters_exclude[10]=''
+
+# Join filters_include array into a single string for grep -e
+sep="\\|"
+grep_include=$(printf "${sep}%s" "${filters_include[@]}")
+# Remove the separator from the start of the string
+grep_include=${grep_include:${#sep}}
+grep_include="\($grep_include\)"
+
+# Join filters_exclude array into a single string for grep -v
+# We use egrep for the exclude since it combines better with -v.
+sep="|"
+egrep_exclude=$(printf "${sep}%s" "${filters_exclude[@]}")
+# Remove the separator from the start of the string
+egrep_exclude=${egrep_exclude:${#sep}}
+egrep_exclude="$egrep_exclude"
+
+LIST=$( git status | grep -e "$grep_include" | egrep -v "$egrep_exclude" )
 
 # Display the list of files to be processed, for overview purposes.
 echo
-echo "File(s) to be proccessed/validated:"
+echo "File(s) to be processed/validated:"
 echo
 
 i=1
+
+# IFS is a bash internal defines the separator for looping over a string.
+IFSBACK=$IFS
+IFS=$'\n'
 for file in $LIST
 do
   # Display the path of the file.
   # % 3 == 0 is used since the path of the file is outputted every 3rd token/line.
-  if [ "$(($i % 3))" -eq "0" ]; then
-    echo $file
-  fi
-  let "i += 1"
+  echo $file | cut -c15-
 done
-
 
 # This counter is used by the Code Sniffer for tracking errors.
 sniffer_error_count=0
@@ -123,105 +163,97 @@ PHPCS_PASSED=0
 
 for file in $LIST
 do
-    if [ "$file" == '#' ]; then
-        continue
-    fi
+    file=$( echo $file | cut -c15- )
 
-    if [ $(echo "$file" | grep 'modified') ]; then
-        FILE_ACTION="modified"
+    ##################################
+    # Check for syntax error.
+    ##################################
 
-    elif [ $(echo "$file" | grep 'added') ]; then
-        FILE_ACTION="added"
+    echo
+    echo
+    echo
+    echo "Validating: $file..."
+    echo
+    echo "I. Running the PHP Linter..."
+    echo
+
+    php -l $file >&2
+    SYNTAX_CODE=$?
+
+    if [ "$SYNTAX_CODE" -eq "$NO_SYNTAX_ERROR" ];then
+
+      #################################
+      # Run Drupal code sniffer
+      #################################
+
+      # Get the PHP Codesniffer bin path
+      PHPCS_BIN=$(which phpcs)
+
+      # Default PHP error code
+      PHP_CODE=0
+
+      echo
+      echo
+      echo "II. Running the PHP Code Sniffer..."
+
+      # Run the PHP Codesniffer validation
+      $PHPCS_BIN --standard=Drupal $file >&2
+
+      # Default PHPCS error code
+      PHPCS_CODE=$?
+
+      if [ "$PHPCS_CODE" == "$PHPCS_PASSED" ]; then
+        echo
+        echo "No formatting errors detected."
+
+      elif [ "$PHPCS_CODE" == "$PHPCS_FAILED" ]; then
+        let "sniffer_error_count += 1"
+
+      else
+        echo
+        echo "Invalid operation."
+        echo
+        clean_exit
+      fi
+
+    elif [ "$SYNTAX_CODE" == "$SYNTAX_ERROR" ]; then
+      echo
+      echo "You have syntax error in your code. Please fix and commit your changes again."
+      echo
+      clean_exit
 
     else
+      echo
+      echo "Invalid operation."
+      echo
+      clean_exit
+    fi
 
-        ##################################
-        # Check for syntax error.
-        ##################################
+    #################################
+    # Check for debugging functions
+    #################################
 
-        echo
-        echo
-        echo "I. Running the PHP Linter..."
-        echo
+    # Define allowed/possible file extensions that might contain debugging functions.
+    EXTENSION=$(echo "$file" | egrep "\.install$|\.test$|\.inc$|\.module$|\.php$")
 
-        php -l $file >&2
-        SYNTAX_CODE=$?
+    if [ "$EXTENSION" != "" ]; then
 
-        if [ "$SYNTAX_CODE" -eq "$NO_SYNTAX_ERROR" ];then
+        index=1
+        while [ "$index" -lt "$element_count" ]
+        do
+            # Find the blacklisted functions in the current file.
+            ERRORS=$(grep "${checks[$index]}" $ROOT_DIR$file >&1)
+            if [ "$ERRORS" != "" ]; then
+                if [ "$ERRORS_BUFFER" != "" ]; then
+                    ERRORS_BUFFER+="\n${checks[$index]} found in file: $file "
 
-          #################################
-          # Run Drupal code sniffer
-          #################################
-
-          # Get the PHP Codesniffer bin path
-          PHPCS_BIN=$(which phpcs)
-
-          # Default PHP error code
-          PHP_CODE=0
-
-          echo
-          echo
-          echo "II. Running the PHP Code Sniffer..."
-
-          # Run the PHP Codesniffer validation
-          $PHPCS_BIN --standard=Drupal $file >&2
-
-          # Default PHPCS error code
-          PHPCS_CODE=$?
-
-          if [ "$PHPCS_CODE" == "$PHPCS_PASSED" ]; then
-            echo
-            echo "No formatting errors detected."
-
-          elif [ "$PHPCS_CODE" == "$PHPCS_FAILED" ]; then
-            let "sniffer_error_count += 1"
-
-          else
-            echo
-            echo "Invalid operation."
-            echo
-            exit 1
-          fi
-
-        elif [ "$SYNTAX_CODE" == "$SYNTAX_ERROR" ]; then
-          echo
-          echo "You have syntax error in your code. Please fix and commit your changes again."
-          echo
-          exit 1
-
-        else
-          echo
-          echo "Invalid operation."
-          echo
-          exit 1
-        fi
-
-        #################################
-        # Check for debugging functions
-        #################################
-
-        # Define allowed/possible file extensions that might contain debugging functions.
-        EXTENSION=$(echo "$file" | egrep "\.install$|\.test$|\.inc$|\.module$|\.php$")
-
-        if [ "$EXTENSION" != "" ]; then
-
-            index=1
-            while [ "$index" -lt "$element_count" ]
-            do
-                # Find the blacklisted functions in the current file.
-                ERRORS=$(grep "${checks[$index]}" $ROOT_DIR$file >&1)
-                if [ "$ERRORS" != "" ]; then
-                    if [ "$ERRORS_BUFFER" != "" ]; then
-                        ERRORS_BUFFER+="\n${checks[$index]} found in file: $file "
-
-                    else
-                        ERRORS_BUFFER="\n${checks[$index]} found in file: $file "
-                    fi
+                else
+                    ERRORS_BUFFER="\n${checks[$index]} found in file: $file "
                 fi
+            fi
 
-                let "index += 1"
-            done
-        fi
+            let "index += 1"
+        done
     fi
 done
 
@@ -229,7 +261,7 @@ if [ "$sniffer_error_count" -gt "0" ]; then
     echo "Your commits failed to pass the PHP code sniffer validation."
     echo "Kindly fix the code sniffer notices."
     echo
-    exit 1
+    clean_exit
 fi
 
 echo
@@ -243,7 +275,7 @@ if [ "$ERRORS_BUFFER" != "" ]; then
     echo
     echo "Can't commit your changes, fix the generated errors first."
     echo
-    exit 1
+    clean_exit
 
 else
     echo
@@ -273,7 +305,7 @@ else
     echo
     echo "Please install esvalidate to validate JS files."
     echo
-    exit 1
+    clean_exit
   fi
 
   for file in $files; do
@@ -281,7 +313,7 @@ else
 
     if [ $? -eq 1 ]; then
       echo "Syntax error: $file"
-      exit 1
+      clean_exit
     fi
   done
 fi
