@@ -68,54 +68,59 @@ checks[16]="\<dvr("
 checks[17]="\<kpr("
 checks[18]="\<kprint_r("
 checks[19]="\<kdevel_print_object("
+checks[20]="\<kdevel_print_object("
 
 # Blacklist code conflicts resulting from Git merge.
-checks[20]="<<<<<<<"
-checks[21]=">>>>>>>"
+checks[21]="<<<<<<<"
+checks[22]=">>>>>>>"
 
 # Blacklist Javascript debugging functions
-checks[22]="\<console.log("
-checks[23]="\<alert("
+checks[23]="\<console.log("
+checks[24]="\<alert("
 
 # Get the total number of blacklisted functions.
 element_count=${#checks[@]}
 let "element_count += 1"
-
 
 ROOT_DIR="$(pwd)/"
 
 # Generate the list of files to be parsed.
 # Include the modified/added files indicated in the output of the Git status command.
 
-filters_include[1]="^\#\s*modified"
-filters_include[2]="^\#\s*added"
-filters_include[3]="^\#\s*new file"
+filters_include[1]="modified"
+filters_include[2]="added"
+filters_include[3]="new file"
 
 # Exclude Features-generated files because they should not be modified.
 # Exclude contribs modules because they should not be modified.
 # Exclude devel module because they contain debugging functions
 # Exclude libraries because they should not be modified
 filters_exclude[1]='features'
-filters_exclude[2]='contribs'
+filters_exclude[2]='contrib'
 filters_exclude[3]='devel'
 filters_exclude[4]='libraries'
+filters_exclude[5]='development'
+filters_exclude[6]='scripts'
 
 # Exclude extensions we know should not be checked.
-filters_exclude[5]='\.png$'
-filters_exclude[6]='\.patch$'
-filters_exclude[7]='\.ad$'
-filters_exclude[8]='\.htaccess$'
-filters_exclude[9]='\.sh$'
+filters_exclude[7]='\.png$'
+filters_exclude[8]='\.gif$'
+filters_exclude[9]='\.jpg$'
+filters_exclude[10]='\.ico$'
+filters_exclude[11]='\.patch$'
+filters_exclude[12]='\.ad$'
+filters_exclude[13]='\.htaccess$'
+filters_exclude[14]='\.sh$'
 
 # Additional excludes specific to this project
-# filters_exclude[10]=''
+# filters_exclude[15]=''
 
 # Join filters_include array into a single string for grep -e
 sep="\\|"
 grep_include=$(printf "${sep}%s" "${filters_include[@]}")
 # Remove the separator from the start of the string
 grep_include=${grep_include:${#sep}}
-grep_include="\($grep_include\)"
+grep_include=".*\($grep_include\)"
 
 # Join filters_exclude array into a single string for grep -v
 # We use egrep for the exclude since it combines better with -v.
@@ -123,7 +128,7 @@ sep="|"
 egrep_exclude=$(printf "${sep}%s" "${filters_exclude[@]}")
 # Remove the separator from the start of the string
 egrep_exclude=${egrep_exclude:${#sep}}
-egrep_exclude="$egrep_exclude"
+egrep_exclude=".*\($egrep_exclude\)"
 
 LIST=$( git status | grep -e "$grep_include" | egrep -v "$egrep_exclude" )
 
@@ -141,7 +146,7 @@ for file in $LIST
 do
   # Display the path of the file.
   # % 3 == 0 is used since the path of the file is outputted every 3rd token/line.
-  echo $file | cut -c15-
+  echo $file | cut -c14-
 done
 
 # This counter is used by the Code Sniffer for tracking errors.
@@ -163,7 +168,7 @@ PHPCS_PASSED=0
 
 for file in $LIST
 do
-    file=$( echo $file | cut -c15- )
+    file=$( echo $file | cut -c14- )
 
     ##################################
     # Check for syntax error.
@@ -298,7 +303,7 @@ if [ ${#files[@]} = 0 ]; then
   echo
 
 else
-  hash esvalidate 2>/dev/null 
+  hash esvalidate 2>/dev/null
 
   if [ $? -eq 1 ]; then
     echo "Unable to check Javascript syntax: esvalidate is not available."
@@ -320,4 +325,3 @@ fi
 
 echo "Congratulations! You have passed all the filters, your code has now been committed."
 echo
-
