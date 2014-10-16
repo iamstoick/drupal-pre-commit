@@ -101,6 +101,7 @@ filters_exclude[3]='devel'
 filters_exclude[4]='libraries'
 filters_exclude[5]='development'
 filters_exclude[6]='scripts'
+filters_exclude[6]='featurized'
 
 # Exclude extensions we know should not be checked.
 filters_exclude[7]='\.png$'
@@ -111,6 +112,10 @@ filters_exclude[11]='\.patch$'
 filters_exclude[12]='\.ad$'
 filters_exclude[13]='\.htaccess$'
 filters_exclude[14]='\.sh$'
+filters_exclude[15]='\.ttf$'
+filters_exclude[16]='\.woff$'
+filters_exclude[17]='\.eot$'
+filters_exclude[18]='\.svg$'
 
 # Additional excludes specific to this project
 # filters_exclude[15]=''
