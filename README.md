@@ -33,7 +33,7 @@ http://pear.php.net/manual/en/installation.getting.php
 ```
 $ sudo pear update-channels
 $ sudo pear install PHP_CodeSniffer
-$ sudo ln -sv /path/to/coder/coder_sniffer/Drupal $(pear config-get php_dir)/PHP/CodeSniffer/Standards/Drupal<strong>
+$ sudo ln -sv /path/to/coder/coder_sniffer/Drupal $(pear config-get php_dir)/PHP/CodeSniffer/Standards/Drupal
 ```
 
 Basically, the idea in #4 is to link/include the Drupal's code sniffer module to the standard PHP Code Sniffer. Here is a sample/actual command for #4:
