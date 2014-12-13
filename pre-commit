@@ -84,13 +84,6 @@ let "element_count += 1"
 
 ROOT_DIR="$(pwd)/"
 
-# Generate the list of files to be parsed.
-# Include the modified/added files indicated in the output of the Git status command.
-
-filters_include[1]="modified"
-filters_include[2]="added"
-filters_include[3]="new file"
-
 # Exclude Features-generated files because they should not be modified.
 # Exclude contribs modules because they should not be modified.
 # Exclude devel module because they contain debugging functions
@@ -135,7 +128,7 @@ egrep_exclude=$(printf "${sep}%s" "${filters_exclude[@]}")
 egrep_exclude=${egrep_exclude:${#sep}}
 egrep_exclude=".*\($egrep_exclude\)"
 
-LIST=$( git status | grep -e "$grep_include" | egrep -v "$egrep_exclude" )
+LIST=$( git diff --name-only --cached --diff-filter=ACM | egrep -v "$egrep_exclude" )
 
 # Display the list of files to be processed, for overview purposes.
 echo
@@ -151,7 +144,7 @@ for file in $LIST
 do
   # Display the path of the file.
   # % 3 == 0 is used since the path of the file is outputted every 3rd token/line.
-  echo $file | cut -c14-
+  echo $file
 done
 
 # This counter is used by the Code Sniffer for tracking errors.
@@ -173,7 +166,6 @@ PHPCS_PASSED=0
 
 for file in $LIST
 do
-    file=$( echo $file | cut -c14- )
 
     ##################################
     # Check for syntax error.
