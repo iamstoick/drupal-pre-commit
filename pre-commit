@@ -109,6 +109,7 @@ filters_exclude[15]='\.ttf$'
 filters_exclude[16]='\.woff$'
 filters_exclude[17]='\.eot$'
 filters_exclude[18]='\.svg$'
+filters_exclude[19]='\.xml$'
 
 # Additional excludes specific to this project
 # filters_exclude[15]=''
