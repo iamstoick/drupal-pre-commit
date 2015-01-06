@@ -117,3 +117,7 @@ to
 ```
 LIST=$( git status | grep -e '.*\(modified\|added\|new file\)' | grep -v '.*\(features\|contribs\|devel\)' )
 ```
+
+DISCUSSION CHANNEL:
+-------------------
+[https://gitter.im/geraldvillorente/drupal-pre-commit](https://gitter.im/geraldvillorente/drupal-pre-commit)
