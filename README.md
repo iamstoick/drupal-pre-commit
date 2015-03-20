@@ -1,6 +1,8 @@
 Git Pre-Commit Hook Setup:
 -------------------------
 
+[![Gitter](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/geraldvillorente/drupal-pre-commit?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+
 1. Rename pre-commit.sample to pre-commit. The file is located in {GitRootDir}/.git/hooks
 
 2. Replace the content with the attached file.
