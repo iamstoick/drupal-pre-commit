@@ -111,16 +111,6 @@ filters_exclude[17]='\.eot$'
 filters_exclude[18]='\.svg$'
 filters_exclude[19]='\.xml$'
 
-# Additional excludes specific to this project
-# filters_exclude[15]=''
-
-# Join filters_include array into a single string for grep -e
-sep="\\|"
-grep_include=$(printf "${sep}%s" "${filters_include[@]}")
-# Remove the separator from the start of the string
-grep_include=${grep_include:${#sep}}
-grep_include=".*\($grep_include\)"
-
 # Join filters_exclude array into a single string for grep -v
 # We use egrep for the exclude since it combines better with -v.
 sep="|"
