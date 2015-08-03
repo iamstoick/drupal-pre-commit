@@ -116,8 +116,10 @@ Please see this [issue](https://github.com/geraldvillorente/drupal-pre-commit/is
 This `drupal-pre-commit` is only compatible with PHP_CodeSniffer 1.x. If you are using version 2.x you need to downgrade to stable version 1.5.6.
 
 Steps to downgrade:
+```
 1. sudo pear uninstall PHP_CodeSniffer
 2. sudo pear install PHP_CodeSniffer-1.5.6
+```
 
 NOTE:
 -----
