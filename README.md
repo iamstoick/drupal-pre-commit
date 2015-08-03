@@ -108,6 +108,17 @@ To use it (e.g., in <strong>Geany IDE</strong>):
 
 <a rel="license" href="http://creativecommons.org/licenses/by-nc/3.0/deed.en_US"><img alt="Creative Commons License" style="border-width:0" src="http://i.creativecommons.org/l/by-nc/3.0/88x31.png" /></a><br /><span xmlns:dct="http://purl.org/dc/terms/" property="dct:title">Drupal Pre Commit Filter</span> by <span xmlns:cc="http://creativecommons.org/ns#" property="cc:attributionName">Gerald Villorente</span> is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-nc/3.0/deed.en_US">Creative Commons Attribution-NonCommercial 3.0 Unported License</a>.<br />Based on a work at <a xmlns:dct="http://purl.org/dc/terms/" href="http://www.niden.net/2011/11/git-pre-commit-another-check-to-ensure.html" rel="dct:source">http://www.niden.net/2011/11/git-pre-commit-another-check-to-ensure.html</a>.
 
+KNOWN ISSUES:
+-------------
+
+Please see this [issue](https://github.com/geraldvillorente/drupal-pre-commit/issues/10).
+
+This `drupal-pre-commit` is only compatible with PHP_CodeSniffer 1.x. If you are using version 2.x you need to downgrade to stable version 1.5.6.
+
+Steps to downgrade:
+1. sudo pear uninstall PHP_CodeSniffer
+2. sudo pear install PHP_CodeSniffer-1.5.6
+
 NOTE:
 -----
 
