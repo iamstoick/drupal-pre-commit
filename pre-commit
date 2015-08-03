@@ -201,6 +201,8 @@ do
 
       elif [ "$PHPCS_CODE" == "$PHPCS_FAILED" ]; then
         let "sniffer_error_count += 1"
+        echo "You have coding standard problem in your code. Please fix and commit your changes again."
+        clean_exit
 
       else
         echo
