@@ -45,38 +45,19 @@ echo
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 # Build the list of PHP blacklisted functions
-checks[1]="\<var_dump("
-checks[2]="\<print_r("
-checks[3]="\<die("
+checks=("\<var_dump(" "\<print_r(" "\<die(")
 
 # Blacklist Drupal's built-in debugging function
-checks[4]="\<debug("
+checks+=("\<debug(")
 
 # Blacklist Devel's debugging functions
-checks[5]="\<dpm("
-checks[6]="\<krumo("
-checks[7]="\<dpr("
-checks[8]="\<dsm("
-checks[9]="\<dd("
-checks[10]="\<ddebug_backtrace("
-checks[11]="\<dpq("
-checks[12]="\<dprint_r("
-checks[13]="\<drupal_debug("
-checks[14]="\<dsm("
-checks[15]="\<dvm("
-checks[16]="\<dvr("
-checks[17]="\<kpr("
-checks[18]="\<kprint_r("
-checks[19]="\<kdevel_print_object("
-checks[20]="\<kdevel_print_object("
+checks+=("\<dpm(" "\<krumo(" "\<dpr(" "\<dsm(" "\<dd(" "\<ddebug_backtrace(" "\<dpq(" "\<dprint_r(" "\<drupal_debug(" "\<dsm(" "\<dvm(" "\<dvr(" "\<kpr(" "\<kprint_r(" "\<kdevel_print_object(" "\<kdevel_print_object(")
 
 # Blacklist code conflicts resulting from Git merge.
-checks[21]="<<<<<<<"
-checks[22]=">>>>>>>"
+checks+=("<<<<<<<" ">>>>>>>")
 
 # Blacklist Javascript debugging functions
-checks[23]="\<console.log("
-checks[24]="\<alert("
+checks+=("\<console.log(" "\<alert(")
 
 # Get the total number of blacklisted functions.
 element_count=${#checks[@]}
@@ -88,28 +69,10 @@ ROOT_DIR="$(pwd)/"
 # Exclude contribs modules because they should not be modified.
 # Exclude devel module because they contain debugging functions
 # Exclude libraries because they should not be modified
-filters_exclude[1]='features'
-filters_exclude[2]='contrib'
-filters_exclude[3]='devel'
-filters_exclude[4]='libraries'
-filters_exclude[5]='development'
-filters_exclude[6]='scripts'
-filters_exclude[6]='featurized'
+filters_exclude=('features' 'contrib' 'devel' 'libraries' 'development' 'scripts' 'featurized' 'vendor')
 
 # Exclude extensions we know should not be checked.
-filters_exclude[7]='\.png$'
-filters_exclude[8]='\.gif$'
-filters_exclude[9]='\.jpg$'
-filters_exclude[10]='\.ico$'
-filters_exclude[11]='\.patch$'
-filters_exclude[12]='\.ad$'
-filters_exclude[13]='\.htaccess$'
-filters_exclude[14]='\.sh$'
-filters_exclude[15]='\.ttf$'
-filters_exclude[16]='\.woff$'
-filters_exclude[17]='\.eot$'
-filters_exclude[18]='\.svg$'
-filters_exclude[19]='\.xml$'
+filters_exclude+=('\.md$' '\.png$' '\.gif$' '\.jpg$' '\.ico$' '\.patch$' '\.ad$' '\.htaccess$' '\.sh$' '\.ttf$' '\.woff$' '\.eot$' '\.svg$' '\.xml$')
 
 # Join filters_exclude array into a single string for grep -v
 # We use egrep for the exclude since it combines better with -v.
