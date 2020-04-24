@@ -61,7 +61,6 @@ checks+=("\<console.log(" "\<alert(")
 
 # Get the total number of blacklisted functions.
 element_count=${#checks[@]}
-let "element_count += 1"
 
 ROOT_DIR="$(pwd)/"
 
