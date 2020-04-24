@@ -71,7 +71,7 @@ ROOT_DIR="$(pwd)/"
 filters_exclude=('features' 'contrib' 'devel' 'libraries' 'development' 'scripts' 'featurized' 'vendor')
 
 # Exclude extensions we know should not be checked.
-filters_exclude+=('\.md$' '\.png$' '\.gif$' '\.jpg$' '\.ico$' '\.patch$' '\.ad$' '\.htaccess$' '\.sh$' '\.ttf$' '\.woff$' '\.eot$' '\.svg$' '\.xml$')
+filters_exclude+=('\.md$' '\.png$' '\.gif$' '\.jpg$' '\.ico$' '\.patch$' '\.ad$' '\.htaccess$' '\.sh$' '\.ttf$' '\.woff$' '\.eot$' '\.svg$' '\.xml$' '\.json$' '\.yml$' '\.gitignore$' '\.lock$' '/settings.php$' '\.min\.js$' '\.make$' '\.md$')
 
 # Join filters_exclude array into a single string for grep -v
 # We use egrep for the exclude since it combines better with -v.
