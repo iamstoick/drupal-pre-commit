@@ -142,6 +142,10 @@ do
       #################################
 
       # Get the PHP Codesniffer bin path
+      if [ -d vendor/bin ]
+      then
+        PATH=vendor/bin:$PATH
+      fi
       PHPCS_BIN=$(which phpcs)
 
       # Default PHP error code
