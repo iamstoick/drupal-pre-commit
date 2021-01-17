@@ -1,3 +1,5 @@
+Looking for a maintainer. Please create an issue if you're interested.
+
 Git Pre-Commit Hook Setup:
 -------------------------
 
