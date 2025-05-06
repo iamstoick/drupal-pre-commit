@@ -20,264 +20,139 @@
 #
 # Special Credits to: Nikolaos Dimopoulos for his great work: http://www.niden.net/2011/11/git-pre-commit-another-check-to-ensure.html
 
-# Define a function to exit which can reset $IFS.
-clean_exit(){
+# Exit on error
+#!/bin/bash
+
+# Exit cleanly and reset IFS
+clean_exit() {
   IFS=$IFSBACK
   exit 1
 }
 
-echo
-echo "************************************************************************"
-echo "*                                                                      *"
-echo "*   GIT PRE-COMMIT HOOK FOR DRUPAL                                     *"
-echo "*                                                                      *"
-echo "*   In order to commit your changes, it must pass the four filters:    *"
-echo "*   I. Syntax checking using PHP Linter                                *"
-echo "*   II. Coding standards checking using PHP Code Sniffer               *"
-echo "*   III. Blacklisted functions checking/validation.                    *"
-echo "*   IV. Check Javascript syntax.                                       *"
-echo "*                                                                      *"
-echo "************************************************************************"
-echo
+clear
 
-
-# Get hook directory
-DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-
-# Build the list of PHP blacklisted functions
-checks=("\<var_dump(" "\<print_r(" "\<die(")
-
-# Blacklist Drupal's built-in debugging function
-checks+=("\<debug(")
-
-# Blacklist Devel's debugging functions
-checks+=("\<dpm(" "\<krumo(" "\<dpr(" "\<dsm(" "\<dd(" "\<ddebug_backtrace(" "\<dpq(" "\<dprint_r(" "\<drupal_debug(" "\<dsm(" "\<dvm(" "\<dvr(" "\<kpr(" "\<kprint_r(" "\<kdevel_print_object(" "\<kdevel_print_object(")
-
-# Blacklist code conflicts resulting from Git merge.
-checks+=("<<<<<<<" ">>>>>>>")
-
-# Blacklist Javascript debugging functions
-checks+=("\<console.log(" "\<alert(")
-
-# Get the total number of blacklisted functions.
-element_count=${#checks[@]}
+cat << "EOF"
+************************************************************************
+*                                                                      *
+*   GIT PRE-COMMIT HOOK FOR DRUPAL 10                                 *
+*                                                                      *
+*   Filters applied before committing your changes:                    *
+*   1. PHP syntax check                                                *
+*   2. PHP Code Sniffer + Auto-fix (phpcs/phpcbf)                     *
+*   3. Debugging functions blacklist                                   *
+*   4. JS linting + Auto-fix (ESLint)                                  *
+*   5. Twig linting (TwigCS)                                           *
+*   6. CSS linting + Auto-fix (Stylelint)                              *
+*                                                                      *
+************************************************************************
+EOF
 
 ROOT_DIR="$(pwd)/"
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
-# Exclude Features-generated files because they should not be modified.
-# Exclude contribs modules because they should not be modified.
-# Exclude devel module because they contain debugging functions
-# Exclude libraries because they should not be modified
-filters_exclude=('features' 'contrib' 'devel' 'libraries' 'development' 'scripts' 'featurized' 'vendor')
+checks=("<var_dump(" "<print_r(" "<die(" "<debug(" "<dpm(" "<krumo(" "<dpr(" \
+        "<dsm(" "<dd(" "<ddebug_backtrace(" "<dpq(" "<dprint_r(" "<drupal_debug(" \
+        "<dvm(" "<dvr(" "<kpr(" "<kprint_r(" "<kdevel_print_object(" \
+        "<<<<<<<" ">>>>>>>" "<console.log(" "<alert(")
 
-# Exclude extensions we know should not be checked.
-filters_exclude+=('\.md$' '\.png$' '\.gif$' '\.jpg$' '\.ico$' '\.patch$' '\.ad$' '\.htaccess$' '\.sh$' '\.ttf$' '\.woff$' '\.eot$' '\.svg$' '\.xml$' '\.json$' '\.yml$' '\.gitignore$' '\.lock$' '/settings.php$' '\.min\.js$' '\.make$' '\.md$')
+filters_exclude=("core" "vendor" "contrib" "libraries")
+exclude_extensions=('\.min\.js$' '\.md$' '\.png$' '\.gif$' '\.jpg$' '\.ico$' \
+                   '\.patch$' '\.ad$' '\.htaccess$' '\.sh$' '\.ttf$' '\.woff$' \
+                   '\.eot$' '\.svg$' '\.xml$' '\.json$' '\.yml$' '\.gitignore$' \
+                   '\.lock$')
 
-# Join filters_exclude array into a single string for grep -v
-# We use egrep for the exclude since it combines better with -v.
-sep="|"
-egrep_exclude=$(printf "${sep}%s" "${filters_exclude[@]}")
-# Remove the separator from the start of the string
-egrep_exclude=${egrep_exclude:${#sep}}
-egrep_exclude=".*\($egrep_exclude\)"
+exclude_pattern="($(IFS='|'; echo "${filters_exclude[*]}"))|($(IFS='|'; echo "${exclude_extensions[*]}"))"
 
-LIST=$( git diff --name-only --cached --diff-filter=ACM | egrep -v "$egrep_exclude" )
+LIST=$(git diff --cached --name-only --diff-filter=ACM | grep -Ev "$exclude_pattern")
 
-# Display the list of files to be processed, for overview purposes.
-echo
-echo "File(s) to be processed/validated:"
-echo
+echo -e "\nFiles to be processed:" && echo "$LIST"
 
-i=1
-
-# IFS is a bash internal defines the separator for looping over a string.
 IFSBACK=$IFS
 IFS=$'\n'
-for file in $LIST
-do
-  # Display the path of the file.
-  # % 3 == 0 is used since the path of the file is outputted every 3rd token/line.
-  echo $file
-done
 
-# This counter is used by the Code Sniffer for tracking errors.
 sniffer_error_count=0
-
 ERRORS_BUFFER=""
 
-# PHP syntax-error free code
 NO_SYNTAX_ERROR=0
-
-# PHP syntax error code
 SYNTAX_ERROR=255
-
-# Code Sniffer error code
 PHPCS_FAILED=1
-
-# Code Sniffer success code
 PHPCS_PASSED=0
 
-for file in $LIST
-do
+for file in $LIST; do
+  echo -e "\nValidating: $file..."
 
-    ##################################
-    # Check for syntax error.
-    ##################################
+  if echo "$file" | grep -Eq '\.(php|module|install|theme|inc)$'; then
+    echo "1. PHP Linting..."
+    php -l "$file" || clean_exit
 
-    echo
-    echo
-    echo
-    echo "Validating: $file..."
-    echo
-    echo "I. Running the PHP Linter..."
-    echo
-
-    php -l $file >&2
-    SYNTAX_CODE=$?
-
-    if [ "$SYNTAX_CODE" -eq "$NO_SYNTAX_ERROR" ];then
-
-      #################################
-      # Run Drupal code sniffer
-      #################################
-
-      # Get the PHP Codesniffer bin path
-      if [ -d vendor/bin ]
-      then
-        PATH=vendor/bin:$PATH
-      fi
-      PHPCS_BIN=$(which phpcs)
-
-      # Default PHP error code
-      PHP_CODE=0
-
-      echo
-      echo
-      echo "II. Running the PHP Code Sniffer..."
-
-      # Run the PHP Codesniffer validation
-      $PHPCS_BIN --standard=Drupal $file >&2
-
-      # Default PHPCS error code
-      PHPCS_CODE=$?
-
-      if [ "$PHPCS_CODE" == "$PHPCS_PASSED" ]; then
-        echo
-        echo "No formatting errors detected."
-
-      elif [ "$PHPCS_CODE" == "$PHPCS_FAILED" ]; then
-        let "sniffer_error_count += 1"
-        echo "You have coding standard problem in your code. Please fix and commit your changes again."
-        clean_exit
-
-      else
-        echo
-        echo "Invalid operation."
-        echo
-        clean_exit
-      fi
-
-    elif [ "$SYNTAX_CODE" == "$SYNTAX_ERROR" ]; then
-      echo
-      echo "You have syntax error in your code. Please fix and commit your changes again."
-      echo
-      clean_exit
-
+    echo "2. PHP Code Beautifier..."
+    if [ -f "vendor/bin/phpcbf" ]; then
+      vendor/bin/phpcbf --standard=Drupal "$file"
     else
-      echo
-      echo "Invalid operation."
-      echo
-      clean_exit
+      phpcbf --standard=Drupal "$file"
     fi
 
-    #################################
-    # Check for debugging functions
-    #################################
-
-    # Define allowed/possible file extensions that might contain debugging functions.
-    EXTENSION=$(echo "$file" | egrep "\.install$|\.test$|\.inc$|\.module$|\.php$")
-
-    if [ "$EXTENSION" != "" ]; then
-
-        index=1
-        while [ "$index" -lt "$element_count" ]
-        do
-            # Find the blacklisted functions in the current file.
-            ERRORS=$(grep "${checks[$index]}" $ROOT_DIR$file >&1)
-            if [ "$ERRORS" != "" ]; then
-                if [ "$ERRORS_BUFFER" != "" ]; then
-                    ERRORS_BUFFER+="\n${checks[$index]} found in file: $file "
-
-                else
-                    ERRORS_BUFFER="\n${checks[$index]} found in file: $file "
-                fi
-            fi
-
-            let "index += 1"
-        done
+    echo "3. PHP Code Sniffer..."
+    if [ -f "vendor/bin/phpcs" ]; then
+      vendor/bin/phpcs --standard=Drupal "$file" || clean_exit
+    else
+      phpcs --standard=Drupal "$file" || clean_exit
     fi
-done
 
-if [ "$sniffer_error_count" -gt "0" ]; then
-    echo "Your commits failed to pass the PHP code sniffer validation."
-    echo "Kindly fix the code sniffer notices."
-    echo
-    clean_exit
-fi
-
-echo
-echo
-echo "III. Running the checker/validator for blacklisted functions..."
-
-if [ "$ERRORS_BUFFER" != "" ]; then
-    echo
-    echo "These errors were found in try-to-commit files: "
-    echo -e $ERRORS_BUFFER
-    echo
-    echo "Can't commit your changes, fix the generated errors first."
-    echo
-    clean_exit
-
-else
-    echo
-    echo "No backlisted function(s) detected."
-    echo
-fi
-
-########################################
-# Execute Esprima js validation.
-########################################
-
-echo
-echo "IV. Check Javascript syntax."
-echo
-
-files=$(git diff-index --name-only HEAD | grep -e '\.js$')
-
-if [ ${#files[@]} = 0 ]; then
-  echo "No JS files found."
-  echo
-
-else
-  hash esvalidate 2>/dev/null
-
-  if [ $? -eq 1 ]; then
-    echo "Unable to check Javascript syntax: esvalidate is not available."
-    echo
-    echo "Please install esvalidate to validate JS files."
-    echo
-    clean_exit
+    for pattern in "${checks[@]}"; do
+      if grep -qE "$pattern" "$ROOT_DIR$file"; then
+        ERRORS_BUFFER+="\n❌ Found '$pattern' in $file"
+      fi
+    done
+    git add "$file"
   fi
 
-  for file in $files; do
-    esvalidate $file
-
-    if [ $? -eq 1 ]; then
-      echo "Syntax error: $file"
+echo
+  if echo "$file" | grep -Eq '\.js$'; then
+    echo "4. JavaScript Linting + Auto-fix (ESLint)..."
+    if command -v eslint >/dev/null; then
+      eslint --fix "$file" || clean_exit
+      eslint "$file" || clean_exit
+      git add "$file"
+    else
+      echo "❌ ESLint not found. Install it with 'npm install eslint'"
       clean_exit
     fi
-  done
+  fi
+
+  if echo "$file" | grep -Eq '\.twig$'; then
+    echo "5. Twig Linting (TwigCS)..."
+    if [ -f "vendor/bin/twigcs" ]; then
+      vendor/bin/twigcs "$file" || clean_exit
+    elif command -v twigcs >/dev/null; then
+      twigcs "$file" || clean_exit
+    else
+      echo "❌ TwigCS not found. Install with 'composer require --dev friendsoftwig/twigcs'"
+      clean_exit
+    fi
+    echo "⚠️ Twig auto-fix is not supported."
+  fi
+
+  if echo "$file" | grep -Eq '\.(css|scss)$'; then
+    echo "6. CSS Linting + Auto-fix (Stylelint)..."
+    if command -v npx >/dev/null; then
+      npx stylelint --fix "$file" || clean_exit
+      npx stylelint "$file" || clean_exit
+      git add "$file"
+    else
+      echo "❌ npx (stylelint) not available. Run 'npm install stylelint stylelint-config-standard'"
+      clean_exit
+    fi
+  fi
+
+done
+
+if [ -n "$ERRORS_BUFFER" ]; then
+  echo -e "\nBlacklisted patterns detected:" 
+  echo -e "$ERRORS_BUFFER"
+  clean_exit
 fi
 
-echo "Congratulations! You have passed all the filters, your code has now been committed."
-echo
+echo -e "\n✅ All checks passed. Proceeding with commit."
+IFS=$IFSBACK
+exit 0
