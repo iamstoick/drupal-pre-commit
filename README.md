@@ -1,6 +1,7 @@
 # I love coffee!
 https://buymeacoffee.com/stoickthevast
 
+# Want to help?
 Looking for a maintainer. Please create an issue if you're interested.
 
 Git Pre-Commit Hook Setup:
