@@ -1,3 +1,5 @@
+[![Gitter](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/geraldvillorente/drupal-pre-commit?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+
 # Primo
 This Git pre-commit hook ensures your Drupal codebase remains clean, standards-compliant, and production-ready by running a series of automated checks and fixes before each commit.
 
@@ -11,8 +13,6 @@ Looking for a maintainer. Please create an issue if you're interested.
 
 Git Pre-Commit Hook Setup:
 -------------------------
-
-[![Gitter](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/geraldvillorente/drupal-pre-commit?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
 1. Rename pre-commit.sample to pre-commit. The file is located in {GitRootDir}/.git/hooks
 
