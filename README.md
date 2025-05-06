@@ -1,7 +1,7 @@
-# I love coffee!
+##  I love coffee!
 https://buymeacoffee.com/stoickthevast
 
-# Want to help?
+##  Want to help?
 Looking for a maintainer. Please create an issue if you're interested.
 
 Git Pre-Commit Hook Setup:
@@ -19,48 +19,59 @@ Git Pre-Commit Hook Setup:
 $ sudo chmod +x /path/to/.git/hooks/pre-commit
 ```
 
-Requirements:
+## Requirements:
 -------------
 
 You need to have a Code Sniffer installed before using this pre-commit script. To install.
 
-For Debian-based systems:
+```
+& composer require --dev drupal/coder
+& vendor/bin/phpcs --config-set installed_paths vendor/drupal/coder/coder_sniffer
+$ vendor/bin/phpcs -i   # Confirm "Drupal" is listed
 
 ```
-$ sudo apt-get install php-pear
+
+## Twig Linting Support?
+--------------
+In your Drupal project root, run:
+```
+$ composer require --dev friendsoftwig/twigcs
 ```
 
-For Mac OS:
-
-http://jason.pureconcepts.net/2012/10/install-pear-pecl-mac-os-x/
-
-Or see the general installation guidelines:
-
-http://pear.php.net/manual/en/installation.getting.php
-
+## CSS/SCSS Linting Support?
+--------------
+To enable CSS/SCSS linting support:
 ```
-$ sudo pear update-channels
-$ sudo pear install PHP_CodeSniffer
-$ sudo ln -sv /path/to/coder/coder_sniffer/Drupal $(pear config-get php_dir)/PHP/CodeSniffer/Standards/Drupal
+$ npm install --save-dev stylelint stylelint-config-standard
 ```
 
-Basically, the idea in #4 is to link/include the Drupal's code sniffer module to the standard PHP Code Sniffer. Here is a sample/actual command for #4:
-
+Create a `.stylelintrc.json` config file:
 ```
-$ sudo ln -sv /home/ranelpadon/dev/cnngod7/html/sites/all/modules/contribs/coder/coder_sniffer/Drupal $(pear config-get php_dir)/PHP/CodeSniffer/Standards/Drupal
-```
-
-The <strong>$(pear config-get php_dir)</strong> part in the #4 command will be usually evaluated in Ubuntu as <strong>/usr/share/php</strong>
-
-To make your Drupal code sniffer module global and not dependent on any Drupal project you can put the module in Drush home folder.
-```
-$ cd ~/.drush
-$ drush dl coder
-$ sudo ln -sv ~/.drush/coder/coder_sniffer/Drupal $(pear config-get php_dir)/PHP/CodeSniffer/Standards/Drupal
+{
+  "extends": "stylelint-config-standard"
+}
 ```
 
-Usage:
---------
+## Notes
+--------------
+* You must commit from project root or adjust relative paths to vendor/bin/.
+* TwigCS doesn’t support auto-fix yet, but it gives detailed violations.
+* Consider adding .twigcs.yml config for custom rules if needed.
+
+## ✅ What the Git Pre-commit Hook Supports
+---------------
+
+| Feature                     | Support Status      | Notes                                             |
+|-----------------------------|---------------------|---------------------------------------------------|
+| PHP syntax check            | ✅ Yes              | Uses `php -l`                                     |
+| PHP code style (Drupal)     | ✅ Yes              | `phpcs` with auto-fix via `phpcbf`                |
+| PHP debug statement check   | ✅ Yes              | Blocks on patterns like `dpm(`, `var_dump(`, etc. |
+| JavaScript syntax & style   | ✅ Yes              | Uses `eslint --fix`                               |
+| Twig linting                | ✅ Yes (no auto-fix)| Via `twigcs`                                      |
+| Twig auto-fix               | ❌ Not supported    | Manual fix or IDE required                        |
+| Auto-restaging fixed files  | ✅ Yes              | Uses `git add` after fixes                        |
+| Composer-aware commands     | ✅ Yes              | Uses `vendor/bin` for local installs              |
+| CSS/SCSS linting & auto-fix | ✅ Yes              | Uses stylelint                                    |
 
 The <strong>pre-commit</strong> hook will only run when using <strong>git commit</strong>
 
@@ -75,6 +86,7 @@ it will exit before the commit get indexed and will display the offending file(s
 
 it will display the line of code and the filename that contain bad code. The developer must resolve the problem first in order to stage the commit.
 
+## Bypassing the pre-commit hook
 If you're really sure that it is ok to commit the changes without resolving the coding standard problem detected by the script, you can skip or bypass the validation by using <strong>--no-verify</strong>
 
 ```
