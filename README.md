@@ -59,9 +59,9 @@ Create a `.stylelintrc.json` config file:
 
 ## Notes
 --------------
-* You must commit from project root or adjust relative paths to vendor/bin/.
+* You must commit from project root or adjust relative paths to `vendor/bin/`.
 * TwigCS doesn’t support auto-fix yet, but it gives detailed violations.
-* Consider adding .twigcs.yml config for custom rules if needed.
+* Consider adding `.twigcs.yml` config for custom rules if needed.
 
 ## ✅ What the Git Pre-commit Hook Supports
 ---------------
@@ -111,7 +111,7 @@ it will display the line of code and the filename that contain bad code. The dev
 
 
 ## Bypassing the pre-commit hook
-If you're really sure that it is ok to commit the changes without resolving the coding standard problem detected by the script, you can skip or bypass the validation by using <strong>--no-verify</strong>
+If you're really sure that it is ok to commit the changes without resolving the coding standard problem detected by the script, you can skip or bypass the validation by using `--no-verify`.
 
 ```
 $ git commit -am "#1452 Commit message | Bypassing validation process" --no-verify
